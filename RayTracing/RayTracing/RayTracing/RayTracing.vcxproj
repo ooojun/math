@@ -152,10 +152,11 @@
   <ItemGroup>
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RayTracing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Geometry.h" />
-    <ClInclude Include="main.h" />
+    <ClInclude Include="RayTracing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
