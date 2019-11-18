@@ -96,7 +96,7 @@ void RayTracing(const Position3& eye,const Sphere& sphere) {
 			{
 				auto rlight = ReflectVector(light, normal.Normalized());
 
-				specular = pow(Clamp(Dot(rlight, -Vray.Normalized())),4.0f);
+				specular = pow(Clamp(Dot(rlight, -Vray.Normalized())),20.0f);
 
 				brightness = min(max(normal.Normalized()*-light, 0) + ambient + specular, 1.0f);
 
