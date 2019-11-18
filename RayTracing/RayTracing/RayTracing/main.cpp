@@ -41,7 +41,7 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 
 	auto W = sqrt(pow(sp.radius, 2) - pow(len, 2));
 
-	normal = (ray * (PLen - W) - Rray);
+	normal = (ray * (PLen - W) - Rray);		//交点の法線
 
 	//三平方の定理を使ってどれくらい戻すのか調べる。(W)
 
@@ -57,6 +57,13 @@ bool IsHitRayAndObject(const Position3& eye,const Vector3& ray,const Sphere& sp,
 	}
 }
 
+Vector3 ReflectVector(const Vector3& inVector,const Vector3& nVector)
+{
+	Vector3 RefVec;
+	RefVec = inVector - nVector * 2 * Dot(inVector, nVector);
+	return RefVec;
+}
+
 ///レイトレーシング
 ///@param eye 視点座標
 ///@param sphere 球オブジェクト(そのうち複数にする)
@@ -67,28 +74,33 @@ void RayTracing(const Position3& eye,const Sphere& sphere) {
 	float ray;
 	Vector3 light = {1,1,-1};
 
-	float brightness;
+	//正規化しとく
+	light.Normalize();
+	float brightness;			//明るさ
+	float specular;				//スペキュラー(鏡面反射光)
+	float ambient = 0.15f;		//アンビエント(環境光)
+	float diffuse;				//デフューズ(拡散反射光)
 
 	for (float y = 0; y < screen_height; ++y) {//スクリーン縦方向
 		for (float x = 0; x < screen_width; ++x) {//スクリーン横方向
+
 			//①視点とスクリーン座標から視線ベクトルを作る
 			Vector3 P = {x - screen_width / 2, y - screen_height / 2,0 };
 			Vector3 Vray = P - eye;
 
 			//②正規化しとく
 			Vray.Normalize();
+
 			//③IsHitRay関数がTrueだったら白く塗りつぶす
 			if (IsHitRayAndObject(eye,Vray,sphere, distance, normal))
 			{
-				brightness = Dot(-light.Normalized(),normal.Normalized());
+				auto rlight = ReflectVector(light, normal.Normalized());
 
-				unsigned char b = 255;
+				specular = pow(Clamp(Dot(rlight, -Vray.Normalized())),4.0f);
 
-				auto rate = Clamp(brightness);
+				brightness = min(max(normal.Normalized()*-light, 0) + ambient + specular, 1.0f);
 
-				b *= rate;
-
-				DrawPixel(x, y, GetColor(b, b, b));
+				DrawPixelWithFloat(x, y, brightness, brightness, brightness);
 			}
 		}
 	}
@@ -99,7 +111,7 @@ int main() {
 	SetGraphMode(screen_width, screen_height, 32);
 	SetMainWindowText(_T("1816007_尾崎隼"));
 	DxLib_Init();
-	//DxLib::DrawBox(0, 0, screen_width, screen_height,0xff00ff,true);
+	DxLib::DrawBox(0, 0, screen_width, screen_height,0xff00ff,true);
 	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100)));
 	WaitKey();
 	DxLib_End();
