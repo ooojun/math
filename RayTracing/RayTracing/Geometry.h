@@ -1,6 +1,5 @@
 #pragma once
 
-
 //サイズを表す構造体
 struct Size {
 	float w;//幅
@@ -9,12 +8,12 @@ struct Size {
 
 //2D座標・ベクトルを表す構造体
 struct Vector2 {
-	Vector2():x(0),y(0){}
-	Vector2(float inx,float iny):x(inx),y(iny){}
+	Vector2() :x(0), y(0) {}
+	Vector2(float inx, float iny) :x(inx), y(iny) {}
 	float x, y;
 	///ベクトルの大きさを返します
 	float Magnitude()const;
-	
+
 	///正規化(大きさを１に)します
 	void Normalize();
 
@@ -52,9 +51,9 @@ typedef Vector2 Position2;
 
 //3D座標・ベクトルを表す構造体
 struct Vector3 {
-	Vector3() :x(0), y(0) ,z(0){}
-	Vector3(float inx, float iny,float inz) :x(inx), y(iny) ,z(inz){}
-	float x, y,z;
+	Vector3() :x(0), y(0), z(0) {}
+	Vector3(float inx, float iny, float inz) :x(inx), y(iny), z(inz) {}
+	float x, y, z;
 	///ベクトルの大きさを返します
 	float Magnitude()const;
 
@@ -69,7 +68,7 @@ struct Vector3 {
 	void operator*=(float scale);
 	Vector3 operator*(float scale)const;
 	Vector3 operator-() {
-		return Vector3(-x, -y,-z);
+		return Vector3(-x, -y, -z);
 	}
 };
 Vector3 operator+(const Vector3& va, const Vector3 vb);
@@ -88,6 +87,17 @@ float operator*(const Vector3& va, const Vector3& vb);
 Vector3 operator%(const Vector3& va, const Vector3& vb);
 typedef Vector3 Position3;
 
+//平面を表す構造体
+struct Plane {
+	Vector3 normal;	//法線ベクトル(正規化済み)
+	float offset;	//原点からのオフセット
+	Plane(const Vector3& innormal, float inoffset) :
+		normal(innormal), offset(inoffset) {
+		normal.Normalize();
+	}
+
+};
+
 ///円を表す構造体
 struct Circle {
 	float radius;//半径
@@ -101,7 +111,7 @@ struct Circle {
 struct Sphere {
 	float radius;//半径
 	Position3 pos; //中心座標
-	Sphere() :radius(0), pos(0, 0,0) {}
+	Sphere() :radius(0), pos(0, 0, 0) {}
 	Sphere(float r, Position3& p) :radius(r), pos(p) {}
 };
 
@@ -133,4 +143,3 @@ struct Rect {
 	void Draw();//自分の矩形を描画する
 	void Draw(Vector2& offset);//自分の矩形を描画する(オフセット付き)
 };
-
