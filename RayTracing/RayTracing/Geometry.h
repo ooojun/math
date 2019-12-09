@@ -143,3 +143,15 @@ struct Rect {
 	void Draw();//自分の矩形を描画する
 	void Draw(Vector2& offset);//自分の矩形を描画する(オフセット付き)
 };
+
+enum class Material_Pattern
+{
+	Horizontal_Stripe,
+	Vertical_Stripe,
+	Checkered,
+};
+
+struct Material
+{
+
+};

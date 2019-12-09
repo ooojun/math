@@ -116,7 +116,6 @@ Vector3::Magnitude()const {
 	return sqrt(x*x+y*y+z*z);
 }
 
-
 void
 Vector3::Normalize() {
 	float mag = Magnitude();
@@ -125,13 +124,11 @@ Vector3::Normalize() {
 	z /= mag;
 }
 
-
 Vector3
 Vector3::Normalized() {
 	float mag = Magnitude();
 	return Vector3(x / mag, y / mag,z/mag);
 }
-
 
 ///“àÏ‚ğ•Ô‚·
 float
@@ -142,7 +139,7 @@ Dot(const Vector3& va, const Vector3& vb) {
 ///ŠOÏ‚ğ•Ô‚·
 Vector3
 Cross(const Vector3& va, const Vector3& vb) {
-	return Vector3(va.z*vb.y-va.y*vb.z,va.z*vb.x-va.x*vb.z,va.x*vb.y - vb.x*va.y);
+	return Vector3(va.z*vb.y - va.y*vb.z, va.z*vb.x - va.x*vb.z, va.x*vb.y - vb.x*va.y);
 }
 
 ///“àÏ‰‰Zq
