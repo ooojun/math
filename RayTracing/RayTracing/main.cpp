@@ -17,6 +17,8 @@ using namespace std;
 const int screen_width = 640;
 const int screen_height = 480;
 
+float RecCnt = 0;
+
 void DrawPixelWithFloat(int x, int y, float r, float g, float b) 
 {
 	DrawPixel(x, y, GetColor(r * 0xff, g * 0xff, b * 0xff));
@@ -60,82 +62,60 @@ Color GetBasicColor(const Primitive* prim, const Vector3& ray, const Position3&h
 	return col;
 }
 
-//Color RecursiveTrace(Vector3 & light, const Position3& eye, const Vector3 & ray, const vector<Primitive *> & prims, Primitive * self, unsigned int limit)
-//{
-//	Color retCol;
-//
-//	Position3 H;
-//
-//	Vector3 N;
-//
-//	float RecCnt;
-//
-//	for (Primitive* prim : prims) {
-//		if (prim->IshitRay(eye, ray,normal, hitpos)) {
-//			if (prim->material.reflectance > 0.1f) {
-//
-//				RecCnt++;
-//
-//				if (RecCnt < limit)		//反射するなら反射ベクトルと衝突点を元に 
-//				{
-//					//再帰する(再帰限界を考慮して) 
-//					RecursiveTrace(light, eye, ray, prims, self, limit);
-//				}
-//				else
-//				{
-//				}
-//			}
-//			else {
-//				//反射しない 
-//				//物体の材質をそのまま採用(色を得る)する 
-//				return GetBasicColor(prim, ray, hitpos, normal, light);
-//				//光源方向を調べて物体のどれかと当たっていたら暗くする 
-//			}
-//		}
-//	}
-//	return retCol;
-//}
-
-Color RecursiveTrace(Vector3 & light, const Position3& eye, const Vector3 & ray, const vector<Primitive *> & prims, Primitive * self, unsigned int limit)
+Color RecursiveTrace(Vector3 & light,const Position3& eye,Vector3 & ray, const vector<Primitive *> & prims, Primitive * self, unsigned int limit)
 {
-	Color retCol;
+	Color retCol = Color(200, 200, 255);
 
 	Position3 H;
 
 	Vector3 N;
 
-	float RecCnt;
-
 	for (Primitive* prim : prims) {
-		if (prim->IshitRay(eye, ray, N, H))
+		if (prim != self)
 		{
-			auto col = GetBasicColor(prims[0], ray, H, N, light);
+			if (prim->IshitRay(eye, ray, N, H)) {
+				if (prim->material.reflectance > 0.1f) {
 
-			auto tmpRay = ReflectVector(ray, N);	//反射ベクトル
+					auto col = GetBasicColor(prim, ray, H, N, light);
 
-			if (prims[1]->IshitRay(H, tmpRay, N, H))
-			{
-				//交点座標を求める
-				auto color = GetCheckerColorPosition(H, prims[1]->material.color);
+					auto tmpRay = ReflectVector(ray, N);	//反射ベクトル
 
-				return Color(col.r * color.Normalization().r, col.g * color.Normalization().g, col.b * color.Normalization().b);
-				continue;
-			}
-			return col;
-		}
-		else
-		{
-			if (prims[1]->IshitRay(eye, ray, N, H))
-			{
-				auto col = GetCheckerColorPosition(H, prims[1]->material.color);
-				return col;
+					RecCnt++;
 
-				//影の実装
-				if (prims[0]->IshitRay(H, -light, N, N))
-				{
-					col *= 0.5;
-					return col;
+					if (RecCnt < limit)		//反射するなら反射ベクトルと衝突点を元に再帰する(再帰限界を考慮して) 
+					{
+						self = prim;
+						RecursiveTrace(light, eye, ray, prims, self, limit);
+					}
+					if (prims[1]->IshitRay(H, tmpRay, N, H))
+					{
+						auto color = GetCheckerColorPosition(H, prim->material.color);
+
+						return Color(col.r * color.Normalization().r, col.g * color.Normalization().g, col.b * color.Normalization().b);
+					}
+					else
+					{
+						return col;
+					}
+					RecCnt = 0;
 				}
+				else//反射しない 
+				{
+					//物体の材質をそのまま採用(色を得る)する 			 
+					if (prim->IshitRay(eye, ray, N, H))
+					{
+						auto col = GetCheckerColorPosition(H, prims[1]->material.color);
+						return col;
+
+						//影の実装
+						if (prim->IshitRay(H, -light, N, N))//光源方向を調べて物体のどれかと当たっていたら暗くする					
+						{
+							col *= 0.5;
+							return col;
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -159,7 +139,7 @@ void RayTracing(Vector3 light, const Position3& eye, std::vector<Primitive*>& pr
 
 			light.Normalize();
 
-			auto c = RecursiveTrace(light, eye, ray, prims, nullptr, 5);
+			auto c = RecursiveTrace(light,eye, ray, prims, nullptr, 5);
 			DrawPixel(x, y, GetColor(c.r, c.g, c.b));
 		}
 	}
@@ -197,8 +177,6 @@ int main() {
 		if (keystate[KEY_INPUT_RIGHT]) {
 			primitives[0]->SetPosition(Position3(primitives[0]->GetPosition().x + 2, primitives[0]->GetPosition().y, primitives[0]->GetPosition().z));
 		}
-
-		DrawBox(0, 0, screen_width, screen_height, GetColor(200, 200, 255), true);
 		RayTracing(Light,Vector3(0, 0, 300), primitives);
 		ScreenFlip();
 	}
